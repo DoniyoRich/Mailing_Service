@@ -1,0 +1,19 @@
+{% extends 'mailing/base.html' %}
+{% load my_tags %}
+
+{% block content %}
+
+<div class="container">
+    <div class="row">
+        <div class="col-6">
+            <h2>Введите Ваши данные для входа в систему</h2>
+            <form method="post">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit" class="btn btn-primary">Войти</button>
+                <a href="{% url 'catalog:catalog' %}" class="btn btn-secondary">Отмена</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock%}
