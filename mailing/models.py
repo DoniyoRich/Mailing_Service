@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.db import models
 
-from mailing.constants import MAILING_STATUS, MAILING_ATTEMPT_STATUS
+from mailing.constants import MAILING_ATTEMPT_STATUS, MAILING_STATUS
 
 
 # Модель Получателя рассылки

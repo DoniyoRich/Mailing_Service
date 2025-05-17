@@ -1,7 +1,10 @@
-from django.contrib.auth.mixins import PermissionRequiredMixin
-from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView, TemplateView
+from django.contrib.auth.mixins import PermissionRequiredMixin, LoginRequiredMixin
+from django.urls import reverse_lazy
+from django.views.generic import (CreateView, DeleteView, DetailView, ListView,
+                                  TemplateView, UpdateView)
 
-from mailing.models import Mailing, Recipient, Message
+from mailing.forms import MailingNewForm, MailingUpdateForm
+from mailing.models import Mailing, Message, Recipient
 
 
 # -----------------------------------------
@@ -14,14 +17,16 @@ class MailingsTotalList(ListView):
     """
     model = Mailing
     template_name = "mailings/mailings.html"
-    context_object_name = "mailing"
+    context_object_name = "mailings"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        context["total"] = 100
-        context["total_active"] = 50
-        context["unique_recipients"] = 7
+        context["total"] = Mailing.objects.all().count()
+        context["total_active"] = "данных нет" if not Mailing.objects.filter(
+            status="Запущена").exists() else Mailing.objects.filter(status="Запущена")
+        context[
+            "unique_recipients"] = "данных нет" if not Recipient.objects.all().exists() else Recipient.objects.all().distinct()
 
         return context
 
@@ -32,7 +37,7 @@ class SearchResults(ListView):
     """
     model = Mailing
     template_name = "mailings/search_results.html"
-    context_object_name = "mailing"
+    context_object_name = "search_results"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -43,46 +48,73 @@ class SearchResults(ListView):
         return context
 
 
-class UserMailingsList(ListView, PermissionRequiredMixin):
+class UserMailingsList(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     """
     Класс отображения списка рассылок конкретного Пользователя.
     """
+    permission_required = "view_mailing"
     model = Mailing
     template_name = "mailings/user_mailings.html"
-    context_object_name = "mailing"
+    context_object_name = "u_mailings"
 
 
-class AddMailing(CreateView, PermissionRequiredMixin):
+class AddMailing(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     """
     Класс добавления рассылки.
     """
+    permission_required = "can_add_mailing"
     model = Mailing
     template_name = "mailings/add_mailing.html"
     context_object_name = "mailing"
+    form_class = MailingNewForm
+    success_url = reverse_lazy('mailing:mailing')
+    login_url = reverse_lazy('users:login')
+
+    def form_valid(self, form):
+        if form.is_valid():
+            self.object = form.save()
+            self.object.owner = self.request.user
+            self.object.save()
+
+        return super().form_valid(form)
 
 
-class DetailMailing(DetailView, PermissionRequiredMixin):
+class DetailMailing(LoginRequiredMixin, PermissionRequiredMixin, DetailView):
     """
     Класс просмотра детальной информации конкретной рассылки.
     """
+    permission_required = "view_mailing"
     model = Mailing
     template_name = "mailings/detail_mailing.html"
     context_object_name = "mailing"
 
 
-class UpdateMailing(UpdateView, PermissionRequiredMixin):
+class UpdateMailing(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     """
     Класс редактирования рассылки.
     """
+    permission_required = "change_mailing"
     model = Mailing
     template_name = "mailings/update_mailing.html"
     context_object_name = "mailing"
+    form_class = MailingUpdateForm
+    success_url = reverse_lazy('mailing:mailing')
+    login_url = reverse_lazy('users:login')
+
+    def form_valid(self, form):
+        if form.is_valid():
+            self.object = form.save()
+            self.object.owner = self.request.user
+            self.object.save()
+
+        return super().form_valid(form)
 
 
-class DeleteMailing(DeleteView, PermissionRequiredMixin):
+class DeleteMailing(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
     """
     Класс удаления рассылки.
     """
+    permission_required = "delete_mailing"
     model = Mailing
     template_name = "mailings/delete_mailing_confirm.html"
     context_object_name = "mailing"
@@ -98,6 +130,15 @@ class RecipientsList(ListView, PermissionRequiredMixin):
     """
     model = Recipient
     template_name = "recipients/recipients.html"
+    context_object_name = "recipients"
+
+
+class DetailRecipient(DetailView, PermissionRequiredMixin):
+    """
+    Класс просмотра детальной информации конкретного Получателя рассылки.
+    """
+    model = Recipient
+    template_name = "recipients/detail_recipient.html"
     context_object_name = "recipient"
 
 
@@ -107,15 +148,6 @@ class AddRecipient(CreateView, PermissionRequiredMixin):
     """
     model = Recipient
     template_name = "recipients/add_recipient.html"
-    context_object_name = "recipient"
-
-
-class DetailRecipient(DetailView, PermissionRequiredMixin):
-    """
-    Класс просмотра детальной информации конкретного Получателя рассылки.
-    """
-    model = Recipient
-    template_name = "recipients/detail_recipient.html"
     context_object_name = "recipient"
 
 
@@ -147,7 +179,7 @@ class MessageList(ListView, PermissionRequiredMixin):
     """
     model = Message
     template_name = "message/messages.html"
-    context_object_name = "message"
+    context_object_name = "messages"
 
 
 class AddMessage(CreateView, PermissionRequiredMixin):
@@ -193,4 +225,4 @@ class Contacts(TemplateView):
     """
     Класс отображения страницы Контактов.
     """
-    template_name = "mailing/contacts.html"
+    template_name = "mailings/contacts.html"

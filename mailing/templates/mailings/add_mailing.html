@@ -2,7 +2,17 @@
 
 {% block content %}
 <div class="container bg-body-tertiary p-3">
-    <h2>Добавить рассылку</h2>
+    <div class="row">
+        <div class="col-6">
+            <h2>Новая рассылка</h2>
+            <form method="post">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit" class="btn btn-primary">Сохранить</button>
+                <a href="{% url 'mailing:mailing' %}" class="btn btn-secondary">Отмена</a>
+            </form>
+        </div>
+    </div>
 </div>
 
 {% endblock %}

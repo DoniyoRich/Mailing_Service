@@ -24,31 +24,38 @@
     </style>
 </head>
 <body>
-<header class="p-3 text-bg-dark">
-    <div class="container">
-        <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
+<header class="p-3 text-bg-terciary border shadow bg-body-tertiary">
+    <div class="container justify-content-center">
+        <div class="d-flex  align-items-center justify-content-center">
             <a href="/"><img src="{% static 'images/logo_my_sender.png' %}" alt="my_sender_logo" width="70px"></a>
-            <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
-                <li><a href="/" class="nav-link px-2 text-white">Главная</a></li>
-                <li><a href="#" class="nav-link px-2 text-white">Мои рассылки</a></li>
-                <li><a href="#" class="nav-link px-2 text-white">Получатели</a></li>
-                <li><a href="{% url 'mailing:contacts' %}" class="nav-link px-2 text-white">Контакты</a></li>
+            <ul class="nav col-6 mb-2 justify-content-center mb-md-0">
+                <li><a href="/" class="nav-link px-2 text-info-emphasis">Главная</a></li>
+                <li><a href="#" class="nav-link px-2 text-info-emphasis">Мои рассылки</a></li>
+                <li><a href="#" class="nav-link px-2 text-info-emphasis">Получатели</a></li>
+                <li><a href="{% url 'mailing:contacts' %}" class="nav-link px-2 text-info-emphasis">Контакты</a>
+                </li>
             </ul>
-            {% if user.is_authenticated%}
-            <!--            показать имя пользователя (email)-->
-            {% endif%}
-            <form method="POST" action="/" class="col-12 col-lg-auto mb-3 mb-lg-0 me-lg-3"
+            <form method="POST" action="/" class="col-6 col-lg-auto mb-3 mb-lg-0 me-lg-3"
                   role="search"><input type="search"
                                        class="form-control form-control-dark"
                                        placeholder="Поиск..."
-                                       aria-label="Search"></form>
-            <div class="text-end">
+                                       aria-label="Search">
+            </form>
+            <div>
+                {% if user.is_authenticated %}
+                <p class="text-success col-6 col-lg-auto mb-3 mb-lg-0 me-lg-3">Вы вошли как {{user.email}}</p>
+                <form action="{% url 'users:logout' %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class=" btn btn btn-danger btn-sm">Выйти</button>
+                </form>
+                {% else %}
                 <a href="{% url 'users:login' %}">
-                    <button type="button" class="btn btn-outline-light me-2">Войти</button>
+                    <button type="button" class="btn btn-primary">Войти</button>
                 </a>
                 <a href="{% url 'users:register' %}">
-                    <button type="button" class="btn btn-warning">Регистрация</button>
+                    <button type="button" class="btn btn-primary">Регистрация</button>
                 </a>
+                {% endif %}
             </div>
         </div>
     </div>

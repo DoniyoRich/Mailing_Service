@@ -1,11 +1,32 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container bg-body-tertiary p-3">
-    <h2>Здесь будут рассылки</h2>
-    <p>Количество всех рассылок: {{ total }}</p>
-    <p>Количество активных рассылок (статус "Запущена"): {{ total_active }}</p>
-    <p>Количество уникальных получателей: {{ unique_recipients }}</p>
+<div class="container p-5 text-center">
+    <h3 class="text-primary-emphasis">MySender - сервис управления рассылками, администрирования и получения
+        статистики.</h3><br>
+    <h5 class="text-secondary">"Превращаем письма в продажи!<br>
+        Ваши emails должны работать на бизнес – а наш сервис поможет в этом!<br>
+    </h5>
 </div>
-
+<div class="container p-3 border border-primary-subtle text-info-emphasis">
+    <table class="table table-striped">
+        <tr>
+            <td class="w-25">Количество всех рассылок в системе:</td>
+            <td class="w-25">{{ total }}</td>
+        </tr>
+        <tr>
+            <td class="w-25">Количество активных рассылок (статус "Запущена"):</td>
+            <td class="w-25">{{ total_active }}</td>
+        </tr>
+        <tr>
+            <td class="w-25">Количество уникальных получателей:</td>
+            <td class="w-25">{{ unique_recipients }}</td>
+        </tr>
+    </table>
+    <div class="container text-center">
+        <a href="{% url 'mailing:add_mailing' %}">
+            <button type="button" class="btn btn-warning text-center">Создать рассылку</button>
+        </a>
+    </div>
+</div>
 {% endblock %}
