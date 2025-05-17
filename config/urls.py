@@ -1,11 +1,13 @@
 from django.contrib import admin
 from django.conf.urls.static import static
-from django.urls import path
+from django.urls import path, include
 
 from config import settings
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path("", include("mailing.urls", namespace="mailing")),
+    path("users/", include("users.urls", namespace="users")),
 ]
 
 if settings.DEBUG:

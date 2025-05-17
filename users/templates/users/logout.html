@@ -11,7 +11,7 @@
                 {% csrf_token %}
                 {{ form.as_p }}
                 <a class="btn btn-primary" href="{% url 'users:login' %}" role="button">Войти снова</a>
-                <a href="{% url 'catalog:catalog' %}" class="btn btn-secondary">В каталог</a>
+                <a href="{% url 'mailing:mailing' %}" class="btn btn-secondary">На главную</a>
             </form>
         </div>
     </div>
