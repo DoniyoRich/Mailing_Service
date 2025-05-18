@@ -1,8 +1,25 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container bg-body-tertiary p-3">
-    <h2>Подробно о Получателе</h2>
+
+<div class="container">
+    <div class="col">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <p class="card-text"><b>Тема:</b>: {{ message.subject }}</p>
+                <p class="card-text"><b>Содержание</b>: {{ message.message_body }}</p>
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="btn-group">
+                        <a class="btn btn-primary" href="{% url 'mailing:messages' %}" role="button">Назад</a>
+                        <a class="btn btn-primary" href="{% url 'mailing:update_message' message.pk %}"
+                           role="button">Изменить</a>
+                        <a class="btn btn-primary" href="{% url 'mailing:delete_message' message.pk %}"
+                           role="button">Удалить</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 {% endblock %}

@@ -1,8 +1,15 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container bg-body-tertiary p-3">
-    <h2>Подтверждение удаления Получателя</h2>
+
+<div class="container">
+    <h2>Удаление сообщения</h2>
+    <h3>Вы уверены, что хотите удалить сообщение?</h3>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Удалить</button>
+        <a href="{% url 'mailing:messages' %}" class="btn btn-secondary">Нет, отбой</a>
+    </form>
 </div>
 
 {% endblock %}

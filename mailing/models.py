@@ -52,9 +52,9 @@ class Message(models.Model):
 # Модель Рассылки
 class Mailing(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Рассылка создана: ")
-    sent_at = models.DateTimeField(verbose_name="Рассылка отправлена: ")
-    finished_at = models.DateTimeField(verbose_name="Рассылка завершена: ")
-    status = models.CharField(choices=MAILING_STATUS, verbose_name="Статус рассылки: ")
+    sent_at = models.DateTimeField(verbose_name="Рассылка отправлена: ", blank=True, null=True)
+    finished_at = models.DateTimeField(verbose_name="Рассылка завершена: ", blank=True, null=True)
+    status = models.CharField(max_length=20, verbose_name="Статус рассылки: ")
     message = models.ForeignKey(Message, on_delete=models.CASCADE)
     recipient = models.ManyToManyField(Recipient)
     owner = models.ForeignKey(

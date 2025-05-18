@@ -1,8 +1,27 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container bg-body-tertiary p-3">
-    <h2>Подробно о Получателе</h2>
+
+<div class="container">
+    <div class="col">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <p class="card-text"><b>ФИО Получателя:</b>: {{ recipient.fullname }}</p>
+                <p class="card-text"><b>email:</b>: {{ recipient.email }}</p>
+                <p class="card-text"><b>Комментарий:</b>: {{ recipient.comment }}</p>
+                <p class="card-text"><b>Владелец:</b>: {{ recipient.owner }}</p>
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="btn-group">
+                        <a class="btn btn-primary" href="{% url 'mailing:recipients' %}" role="button">Назад</a>
+                        <a class="btn btn-primary" href="{% url 'mailing:update_recipient' recipient.pk %}"
+                           role="button">Изменить</a>
+                        <a class="btn btn-primary" href="{% url 'mailing:delete_recipient' recipient.pk %}"
+                           role="button">Удалить</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 {% endblock %}

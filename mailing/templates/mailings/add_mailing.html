@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
+
 <div class="container bg-body-tertiary p-3">
     <div class="row">
         <div class="col-6">
@@ -9,7 +10,7 @@
                 {% csrf_token %}
                 {{ form.as_p }}
                 <button type="submit" class="btn btn-primary">Сохранить</button>
-                <a href="{% url 'mailing:mailing' %}" class="btn btn-secondary">Отмена</a>
+                <a href="{% url 'mailing:user_mailings' %}" class="btn btn-secondary">Отмена</a>
             </form>
         </div>
     </div>

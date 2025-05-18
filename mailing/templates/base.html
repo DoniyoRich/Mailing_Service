@@ -28,10 +28,17 @@
     <div class="container justify-content-center">
         <div class="d-flex  align-items-center justify-content-center">
             <a href="/"><img src="{% static 'images/logo_my_sender.png' %}" alt="my_sender_logo" width="70px"></a>
-            <ul class="nav col-6 mb-2 justify-content-center mb-md-0">
+            <ul class="nav col-6 mb-2 mb-md-0">
                 <li><a href="/" class="nav-link px-2 text-info-emphasis">Главная</a></li>
-                <li><a href="#" class="nav-link px-2 text-info-emphasis">Мои рассылки</a></li>
-                <li><a href="#" class="nav-link px-2 text-info-emphasis">Получатели</a></li>
+                {% if user.is_authenticated %}
+                <li><a href="{% url 'mailing:user_mailings' %}" class="nav-link px-2 text-info-emphasis">Мои
+                    рассылки</a></li>
+                <li><a href="{% url 'mailing:recipients' %}" class="nav-link px-2 text-info-emphasis">Получатели</a>
+                </li>
+                <li><a href="{% url 'mailing:messages' %}" class="nav-link px-2 text-info-emphasis">Сообщения</a></li>
+                <li><a href="{% url 'users:users_list' %}" class="nav-link px-2 text-info-emphasis">Пользователи</a>
+                </li>
+                {% endif %}
                 <li><a href="{% url 'mailing:contacts' %}" class="nav-link px-2 text-info-emphasis">Контакты</a>
                 </li>
             </ul>
@@ -46,15 +53,14 @@
                 <p class="text-success col-6 col-lg-auto mb-3 mb-lg-0 me-lg-3">Вы вошли как {{user.email}}</p>
                 <form action="{% url 'users:logout' %}" method="post">
                     {% csrf_token %}
-                    <button type="submit" class=" btn btn btn-danger btn-sm">Выйти</button>
+                    <a href="{% url 'users:view_profile' user.pk %}"
+                       class="btn btn-primary btn-sm">Мой профиль
+                    </a>
+                    <button type="submit" class="btn btn-danger btn-sm">Выйти</button>
                 </form>
                 {% else %}
-                <a href="{% url 'users:login' %}">
-                    <button type="button" class="btn btn-primary">Войти</button>
-                </a>
-                <a href="{% url 'users:register' %}">
-                    <button type="button" class="btn btn-primary">Регистрация</button>
-                </a>
+                <a href="{% url 'users:login' %}" class="btn btn-primary">Войти</a>
+                <a href="{% url 'users:register' %}" class="btn btn-primary">Регистрация</a>
                 {% endif %}
             </div>
         </div>

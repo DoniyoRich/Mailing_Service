@@ -77,6 +77,9 @@ DATABASES = {
     }
 }
 
+# ВАЛИДАЦИЯ ПАРОЛЕЙ ВРЕМЕННО ОТКЛЮЧЕНА НА ПЕРИОД РАЗРАБОТКИ
+
+"""
 AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
@@ -91,6 +94,7 @@ AUTH_PASSWORD_VALIDATORS = [
         "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
+"""
 
 LANGUAGE_CODE = "ru"
 
@@ -119,4 +123,4 @@ if CACHE_ENABLED:
 
 AUTH_USER_MODEL = "users.CustomUser"
 
-LOGIN_REDIRECT_URL = "/"
+LOGIN_REDIRECT_URL = "mailing:user_mailings"
