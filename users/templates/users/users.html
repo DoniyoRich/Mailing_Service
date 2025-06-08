@@ -10,12 +10,11 @@
     <table class="table table-striped">
         {% for user in users %}
         <tr>
-            <td class="w-25"><img src="{{ user.avatar | media_filter }}" style="width: 50px"></td>
-            <td class="w-25"><b>Username: {{ user.username }} </b></td>
-            <td class="w-25">email: {{ user.email }}</td>
-            <td class="w-25">Номер телефона: {{ user.phone_number }}</td>
-            <td class="w-25">Страна: {{ user.country }}</td>
-            <td class="w-25">
+            <td class="align-middle w-25"><img src="{{ user.avatar | media_filter }}" style="width: 50px"></td>
+            <td class="align-middle w-25">email: {{ user.email }}</td>
+            <td class="align-middle w-25">Номер телефона: {{ user.phone_number }}</td>
+            <td class="align-middle w-25">Страна: {{ user.country }}</td>
+            <td class="align-middle w-25">
                 <div class="btn-group">
                     <a class="btn btn-primary" href="{% url 'users:view_profile' user.pk %}"
                        role="button">Подробнее</a>

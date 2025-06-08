@@ -26,35 +26,49 @@
 <body>
 <header class="p-3 text-bg-terciary border shadow bg-body-tertiary">
     <div class="container justify-content-center">
-        <div class="d-flex  align-items-center justify-content-center">
+        <div class="d-flex  align-items-center justify-content-between">
             <a href="/"><img src="{% static 'images/logo_my_sender.png' %}" alt="my_sender_logo" width="70px"></a>
-            <ul class="nav col-6 mb-2 mb-md-0">
+            <ul class="nav">
                 <li><a href="/" class="nav-link px-2 text-info-emphasis">Главная</a></li>
-                {% if user.is_authenticated %}
-                <li><a href="{% url 'mailing:user_mailings' %}" class="nav-link px-2 text-info-emphasis">Мои
-                    рассылки</a></li>
-                <li><a href="{% url 'mailing:recipients' %}" class="nav-link px-2 text-info-emphasis">Получатели</a>
+
+                {% if user.is_authenticated and perms.mailing.add_mailing %}
+                <li>
+                    <a href="{% url 'mailing:user_mailings' %}" class="nav-link px-2 text-info-emphasis">Мои
+                        рассылки</a>
                 </li>
-                <li><a href="{% url 'mailing:messages' %}" class="nav-link px-2 text-info-emphasis">Сообщения</a></li>
-                <li><a href="{% url 'users:users_list' %}" class="nav-link px-2 text-info-emphasis">Пользователи</a>
+                <li>
+                    <a href="{% url 'mailing:attempts' %}" class="nav-link px-2 text-info-emphasis">Попытки рассылки</a>
+                </li>
+                <li>
+                    <a href="{% url 'mailing:messages' %}" class="nav-link px-2 text-info-emphasis">Сообщения</a>
+                </li>
+                <li>
+                    <a href="{% url 'mailing:recipients' %}" class="nav-link px-2 text-info-emphasis">Получатели</a>
                 </li>
                 {% endif %}
-                <li><a href="{% url 'mailing:contacts' %}" class="nav-link px-2 text-info-emphasis">Контакты</a>
+                {% if user.is_authenticated and perms.users.view_customuser %}
+                <li>
+                    <a href="{% url 'mailing:man_mailings' %}" class="nav-link px-2 text-info-emphasis">Рассылки</a>
                 </li>
+                <li>
+                    <a href="{% url 'users:users_list' %}" class="nav-link px-2 text-info-emphasis">Пользователи</a>
+                </li>
+                {% endif %}
+                {% if user.is_authenticated and perms.mailing.can_view_recipient %}
+                <li>
+                    <a href="{% url 'mailing:manager_recipients' %}"
+                       class="nav-link px-2 text-info-emphasis">Получатели</a>
+                </li>
+                {% endif %}
+                <li><a href="{% url 'mailing:contacts' %}" class="nav-link px-2 text-info-emphasis">Контакты</a></li>
             </ul>
-            <form method="POST" action="/" class="col-6 col-lg-auto mb-3 mb-lg-0 me-lg-3"
-                  role="search"><input type="search"
-                                       class="form-control form-control-dark"
-                                       placeholder="Поиск..."
-                                       aria-label="Search">
-            </form>
             <div>
                 {% if user.is_authenticated %}
                 <p class="text-success col-6 col-lg-auto mb-3 mb-lg-0 me-lg-3">Вы вошли как {{user.email}}</p>
                 <form action="{% url 'users:logout' %}" method="post">
                     {% csrf_token %}
                     <a href="{% url 'users:view_profile' user.pk %}"
-                       class="btn btn-primary btn-sm">Мой профиль
+                       class="btn btn-success btn-sm">Мой профиль
                     </a>
                     <button type="submit" class="btn btn-danger btn-sm">Выйти</button>
                 </form>

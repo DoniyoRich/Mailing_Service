@@ -1,9 +1,11 @@
 from django.contrib.auth import login
 from django.contrib.auth.mixins import PermissionRequiredMixin, LoginRequiredMixin
+from django.contrib.auth.views import LoginView
 from django.urls import reverse_lazy
 from django.views.generic import ListView, CreateView, DetailView, UpdateView, DeleteView
 
-from users.forms import UserRegisterForm, UserEditProfileForm
+from mailing.constants import MANAGER_GROUP_NAME
+from users.forms import UserRegisterForm, UserEditProfileForm, UserBlockProfileForm
 from users.models import CustomUser
 
 
@@ -16,24 +18,19 @@ class UserRegisterView(CreateView):
         user = form.save()
         login(self.request, user)
 
-        # СТРОКА НИЖЕ РАБОТОСПОСОБНАЯ, ПРОСТО ВРЕМЕННО ОТКЛЮЧЕНА
-        # self.send_welcome_email(user.email)
-
         return super().form_valid(form)
 
 
-# ФУНКЦИЯ НИЖЕ РАБОТОСПОСОБНА, ОНА ВРЕМЕННО ОТКЛЮЧЕНА ДЛЯ ПРОВЕРКИ ДОМАШКИ
-# НА ПРАВА ДОСТУПА, ТАК КАК ОТПРАВЛЯЕТ СООБЩЕНИЯ НА РЕАЛЬНЫЕ АДРЕСА
-# ЭЛЕКТРОННОЙ ПОЧТЫ.
-# ПРИ ТЕСТИРОВАНИИ ФУКЦИОНАЛА ПРАВ ДОСТУПА МОГУТ БЫТ СОЗДАНЫ РАЗНЫЕ
-# НЕСУЩЕСТВУЮЩИЕ ПОЛЬЗОВАТЕЛИ, ЧТО ВЫЗОВЕТ ОШИБКУ
+class CustomLoginView(LoginView):
+    template_name = 'users/login.html'
 
-# def send_welcome_email(self, user_email):
-#     subject = 'Добро пожаловать!'
-#     message = 'Спасибо, что зарегистрировались в нашем интернет-магазине!'
-#     from_email = EMAIL_HOST_USER
-#     recipient_list = [user_email]
-#     send_mail(subject, message, from_email, recipient_list)
+    redirect_authenticated_user = False
+
+    def get_success_url(self):
+        user = self.request.user
+        if user.groups.filter(name=MANAGER_GROUP_NAME).exists():
+            return reverse_lazy('mailing:man_mailings')
+        return reverse_lazy('mailing:user_mailings')
 
 
 class UsersListView(ListView):
@@ -45,15 +42,33 @@ class UsersListView(ListView):
 class UserProfileView(DetailView):
     model = CustomUser
     template_name = "users/user_profile_detail.html"
+    context_object_name = "custom_user"
 
 
 class UserEditProfileView(UpdateView):
     model = CustomUser
     form_class = UserEditProfileForm
     template_name = "users/edit_profile.html"
-    success_url = reverse_lazy('mailing:user_mailings')
+    success_url = reverse_lazy('users:users_list')
+    context_object_name = "custom_user"
 
+
+class UserBlockProfileView(UpdateView):
+    model = CustomUser
+    form_class = UserBlockProfileForm
+    template_name = "users/block_profile.html"
+    success_url = reverse_lazy('users:users_list')
+    context_object_name = "custom_user"
+
+
+class UserUnBlockProfileView(UpdateView):
+    model = CustomUser
+    form_class = UserBlockProfileForm
+    template_name = "users/unblock_profile.html"
+    success_url = reverse_lazy('users:users_list')
+    context_object_name = "custom_user"
 
 class UserDeleteProfileView(DeleteView):
     model = CustomUser
     template_name = "users/delete_profile.html"
+    context_object_name = "custom_user"

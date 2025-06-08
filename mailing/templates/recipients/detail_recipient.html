@@ -13,9 +13,9 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <div class="btn-group">
                         <a class="btn btn-primary" href="{% url 'mailing:recipients' %}" role="button">Назад</a>
-                        <a class="btn btn-primary" href="{% url 'mailing:update_recipient' recipient.pk %}"
+                        <a class="btn btn-warning" href="{% url 'mailing:update_recipient' recipient.pk %}"
                            role="button">Изменить</a>
-                        <a class="btn btn-primary" href="{% url 'mailing:delete_recipient' recipient.pk %}"
+                        <a class="btn btn-danger" href="{% url 'mailing:delete_recipient' recipient.pk %}"
                            role="button">Удалить</a>
                     </div>
                 </div>

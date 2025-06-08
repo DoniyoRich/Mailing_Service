@@ -2,11 +2,13 @@
 
 {% block content %}
 
+{% if user.is_authenticated and not perms.mailing.can_view_recipient %}
 <div class="container">
     <a href="{% url 'mailing:add_recipient' %}">
         <button type="button" class="btn btn-warning text-center m-3">Новый Получатель</button>
     </a>
 </div>
+{% endif %}
 <div class="container p-3 border border-primary-subtle text-info-emphasis">
     <table class="table table-striped">
         {% for recipient in recipients %}
@@ -14,7 +16,6 @@
             <td class="w-25"><b>Email Получателя: {{ recipient.email }} </b></td>
             <td class="w-25">ФИО Получателя: {{ recipient.fullname|truncatechars:50 }}</td>
             <td class="w-25">Комментарий: {{ recipient.comment|truncatechars:50 }}</td>
-            <td class="w-25">Владелец: {{ recipient.owner }}</td>
             <td class="w-25">
                 <div class="btn-group">
                     <a class="btn btn-primary" href="{% url 'mailing:detail_recipient' recipient.pk %}"

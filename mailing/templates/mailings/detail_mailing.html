@@ -7,18 +7,26 @@
         <div class="card shadow-sm">
             <div class="card-body">
                 <p class="card-text"><b>Сообщение</b>: {{ mailing.message }}</p>
-                <p class="card-text"><b>Получатель</b>: {{ mailing.recipient }}</p>
+                <p class="card-text"><b>Получатели</b>:
+                    {% for recipient in mailing.recipient.all %}
+                    {{ recipient.fullname|truncatechars:15 }}
+                    {% if not forloop.last %}, {% endif %}
+                    {% empty %}
+                    Нет получателей
+                    {% endfor %}
+
                 <p class="card-text"><b>Дата создания</b>: {{ mailing.created_at }}</p>
                 <p class="card-text"><b>Дата отправки</b>: {{ mailing.sent_at }}</p>
                 <p class="card-text"><b>Дата завершения</b>: {{ mailing.finished_at }}</p>
                 <p class="card-text"><b>Статус</b>: {{ mailing.status }}</p>
                 <div class="d-flex justify-content-between align-items-center">
                     <div class="btn-group">
-                        <a class="btn btn-primary" href="{% url 'mailing:user_mailings' %}" role="button">Назад</a>
-                        <a class="btn btn-primary" href="{% url 'mailing:send_mailing' %}" role="button">Отправить</a>
-                        <a class="btn btn-primary" href="{% url 'mailing:update_mailing' mailing.pk %}"
+                        <a class="btn btn-primary" href="javascript:history.back()" role="button">Назад</a>
+                        {% if mailing.status == 'Создана' and perms.mailing.change_mailing %}
+                        <a class="btn btn-warning" href="{% url 'mailing:update_mailing' mailing.pk %}"
                            role="button">Изменить</a>
-                        <a class="btn btn-primary" href="{% url 'mailing:delete_mailing' mailing.pk %}"
+                        {% endif %}
+                        <a class="btn btn-danger" href="{% url 'mailing:delete_mailing' mailing.pk %}"
                            role="button">Удалить</a>
                     </div>
                 </div>

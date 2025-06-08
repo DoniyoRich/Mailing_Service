@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container">
+    <a class="link-opacity-50-hover" href="{% url 'mailing:user_mailings' %}">Все рассылки</a>
+    <a class="link-opacity-50-hover" href="{% url 'mailing:user_mailings_active' %}">Только активные</a>
+    <a class="link-opacity-50-hover" href="{% url 'mailing:user_mailings_nonactive' %}">Только неактивные</a>
+    <p>
+        <u><span>Всего рассылок: {{ mailings_total }}, </span><span>Запущено: {{ mailings_started }}, </span><span> Завершено: {{ mailings_finished }}</span></u>
+    </p>
+</div>
+<div class="container p-3 border border-primary-subtle text-info-emphasis min-vh-50 h-100">
+    <table class="table table-striped">
+        {% for mailing in mailings %}
+        <tr>
+            <td class="w-25"><b>Создана: </b>{{ mailing.created_at }}</td>
+            <td class="w-25"><b>Отправлена: </b>{{ mailing.sent_at }}</td>
+            <td class="w-25"><b>Статус: </b>{{ mailing.status }}</td>
+            <td class="w-25"><b>Активна: </b>{{ mailing.is_active }}</td>
+            <td class="w-25">
+                <div class="btn-group">
+                    <a class="btn btn-primary mx-2" href="{% url 'mailing:detail_mailing' mailing.pk %}"
+                       role="button">Подробнее
+                    </a>
+                </div>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+
+{% endblock %}

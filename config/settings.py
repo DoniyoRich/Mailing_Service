@@ -122,5 +122,3 @@ if CACHE_ENABLED:
     }
 
 AUTH_USER_MODEL = "users.CustomUser"
-
-LOGIN_REDIRECT_URL = "mailing:user_mailings"

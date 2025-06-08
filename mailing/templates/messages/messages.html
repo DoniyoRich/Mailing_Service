@@ -13,7 +13,6 @@
         <tr>
             <td class="w-25"><b>Тема сообщения: {{ message.subject }}</b></td>
             <td class="w-25">Сообщение: {{ message.message_body|truncatechars:50 }}</td>
-            <td class="w-25">Владелец: {{ message.owner }}</td>
             <td class="w-25">
                 <div class="btn-group">
                     <a class="btn btn-primary" href="{% url 'mailing:detail_message' message.pk %}"
