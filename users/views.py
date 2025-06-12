@@ -1,5 +1,4 @@
 from django.contrib.auth import login
-from django.contrib.auth.mixins import PermissionRequiredMixin, LoginRequiredMixin
 from django.contrib.auth.views import LoginView
 from django.urls import reverse_lazy
 from django.views.generic import ListView, CreateView, DetailView, UpdateView, DeleteView
@@ -10,6 +9,9 @@ from users.models import CustomUser
 
 
 class UserRegisterView(CreateView):
+    """
+    Представление регистрации пользователя.
+    """
     form_class = UserRegisterForm
     template_name = 'users/reg_user_form.html'
     success_url = reverse_lazy('mailing:user_mailings')
@@ -22,6 +24,9 @@ class UserRegisterView(CreateView):
 
 
 class CustomLoginView(LoginView):
+    """
+    Представление авторизации пользователя.
+    """
     template_name = 'users/login.html'
 
     redirect_authenticated_user = False
@@ -34,18 +39,27 @@ class CustomLoginView(LoginView):
 
 
 class UsersListView(ListView):
+    """
+    Представление вывода списка пользователей.
+    """
     model = CustomUser
     template_name = "users/users.html"
     context_object_name = "users"
 
 
 class UserProfileView(DetailView):
+    """
+    Представление просмотра профиля пользователя.
+    """
     model = CustomUser
     template_name = "users/user_profile_detail.html"
     context_object_name = "custom_user"
 
 
 class UserEditProfileView(UpdateView):
+    """
+    Представление редактирования профиля пользователя.
+    """
     model = CustomUser
     form_class = UserEditProfileForm
     template_name = "users/edit_profile.html"
@@ -54,6 +68,9 @@ class UserEditProfileView(UpdateView):
 
 
 class UserBlockProfileView(UpdateView):
+    """
+    Представление блокировки пользователя.
+    """
     model = CustomUser
     form_class = UserBlockProfileForm
     template_name = "users/block_profile.html"
@@ -62,13 +79,20 @@ class UserBlockProfileView(UpdateView):
 
 
 class UserUnBlockProfileView(UpdateView):
+    """
+    Представление разблокировки профиля пользователя.
+    """
     model = CustomUser
     form_class = UserBlockProfileForm
     template_name = "users/unblock_profile.html"
     success_url = reverse_lazy('users:users_list')
     context_object_name = "custom_user"
 
+
 class UserDeleteProfileView(DeleteView):
+    """
+    Представление удаления профиля пользователя.
+    """
     model = CustomUser
     template_name = "users/delete_profile.html"
     context_object_name = "custom_user"

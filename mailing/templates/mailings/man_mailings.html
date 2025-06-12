@@ -3,9 +3,6 @@
 {% block content %}
 
 <div class="container">
-    <a class="link-opacity-50-hover" href="{% url 'mailing:user_mailings' %}">Все рассылки</a>
-    <a class="link-opacity-50-hover" href="{% url 'mailing:user_mailings_active' %}">Только активные</a>
-    <a class="link-opacity-50-hover" href="{% url 'mailing:user_mailings_nonactive' %}">Только неактивные</a>
     <p>
         <u><span>Всего рассылок: {{ mailings_total }}, </span><span>Запущено: {{ mailings_started }}, </span><span> Завершено: {{ mailings_finished }}</span></u>
     </p>
@@ -16,8 +13,11 @@
         <tr>
             <td class="w-25"><b>Создана: </b>{{ mailing.created_at }}</td>
             <td class="w-25"><b>Отправлена: </b>{{ mailing.sent_at }}</td>
+            <td class="w-25"><b>Активность: </b>
+                {% if mailing.is_active %} Активна {% endif %}
+                {% if not mailing.is_active %} Отключена {% endif %}
+            </td>
             <td class="w-25"><b>Статус: </b>{{ mailing.status }}</td>
-            <td class="w-25"><b>Активна: </b>{{ mailing.is_active }}</td>
             <td class="w-25">
                 <div class="btn-group">
                     <a class="btn btn-primary mx-2" href="{% url 'mailing:detail_mailing' mailing.pk %}"

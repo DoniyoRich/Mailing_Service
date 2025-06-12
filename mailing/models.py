@@ -1,11 +1,14 @@
 from django.conf import settings
 from django.db import models
 
-from mailing.constants import MAILING_ATTEMPT_STATUS, MAILING_STATUS
+from mailing.constants import MAILING_ATTEMPT_STATUS
 
 
 # Модель Получателя рассылки
 class Recipient(models.Model):
+    """
+    Модель Получателя рассылки.
+    """
     email = models.EmailField(unique=True, verbose_name="e-mail Получателя")
     fullname = models.CharField(max_length=100, verbose_name="ФИО Получателя")
     comment = models.TextField(verbose_name="Комментарий", blank=True, null=True)
@@ -18,7 +21,6 @@ class Recipient(models.Model):
         null=True,
     )
 
-
     class Meta:
         verbose_name = "Получатель"
         verbose_name_plural = "Получатели"
@@ -27,13 +29,15 @@ class Recipient(models.Model):
             ('can_view_recipient', 'Может смотреть получателей'),
         ]
 
-
     def __str__(self):
         return self.fullname
 
 
 # Модель Сообщения
 class Message(models.Model):
+    """
+    Модель Сообщения для рассылки.
+    """
     subject = models.CharField(max_length=100, verbose_name="Тема письма", blank=True, null=True)
     message_body = models.TextField(verbose_name="Текст письма", blank=True, null=True)
     owner = models.ForeignKey(
@@ -59,6 +63,9 @@ class Message(models.Model):
 
 # Модель Рассылки
 class Mailing(models.Model):
+    """
+    Модель Рассылки.
+    """
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Рассылка создана: ")
     sent_at = models.DateTimeField(verbose_name="Рассылка отправлена: ", blank=True, null=True)
     finished_at = models.DateTimeField(verbose_name="Рассылка завершена: ", blank=True, null=True)
@@ -87,10 +94,14 @@ class Mailing(models.Model):
 
 # Модель Попытка рассылки
 class MailingAttempt(models.Model):
+    """
+    Модель попытки рассылки.
+    """
     attempt_date = models.DateTimeField()
     attempt_status = models.CharField(choices=MAILING_ATTEMPT_STATUS, verbose_name="Статус попытки: ")
     mail_server_response = models.TextField()
     mailing = models.ForeignKey(Mailing, on_delete=models.CASCADE)
+    recipient_email = models.CharField(default="")
     owner = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,

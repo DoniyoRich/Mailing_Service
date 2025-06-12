@@ -1,17 +1,18 @@
-import smtplib
+from smtplib import SMTPException
 
-from django.utils import timezone
-
-from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
-from django.core.mail import send_mail
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.cache import cache
+from django.core.mail import EmailMessage, get_connection
 from django.urls import reverse_lazy
+from django.utils import timezone
 from django.views.generic import (CreateView, DeleteView, DetailView, ListView,
                                   TemplateView, UpdateView)
 
 from config.settings import DEFAULT_FROM_EMAIL
-from mailing.forms import MailingNewForm, MailingUpdateForm, RecipientNewForm, RecipientUpdateForm, MessageUpdateForm, \
-    MessageNewForm
-from mailing.models import Mailing, Message, Recipient, MailingAttempt
+from mailing.forms import (MailingNewForm, MailingUpdateForm, MessageNewForm,
+                           MessageUpdateForm, RecipientNewForm,
+                           RecipientUpdateForm, MailingBlockForm)
+from mailing.models import Mailing, MailingAttempt, Message, Recipient
 
 
 # -----------------------------------------
@@ -20,7 +21,7 @@ from mailing.models import Mailing, Message, Recipient, MailingAttempt
 
 class MailingsTotalList(ListView):
     """
-    Класс отображения списка всех рассылок в системе.
+    Представление отображения информации по рассылкам на главной странице.
     """
     model = Mailing
     template_name = "mailings/mailings.html"
@@ -31,7 +32,9 @@ class MailingsTotalList(ListView):
 
         context["total"] = Mailing.objects.all().count()
         context["total_active"] = "данных нет" if not Mailing.objects.filter(
-            status="Запущена").exists() else Mailing.objects.filter(status="Запущена").count()
+            status="Завершена").exists() else Mailing.objects.filter(status="Завершена").count()
+        context["total_failed"] = "данных нет" if not Mailing.objects.filter(
+            status="Ошибка").exists() else Mailing.objects.filter(status="Ошибка").count()
         context[
             "unique_recipients"] = "данных нет" if not Recipient.objects.all().exists() else Recipient.objects.all().distinct().count()
 
@@ -40,7 +43,7 @@ class MailingsTotalList(ListView):
 
 class UserMailingsListAll(LoginRequiredMixin, ListView):
     """
-    Класс отображения списка рассылок конкретного Пользователя.
+    Представление отображения списка рассылок определенного Пользователя.
     """
     model = Mailing
     template_name = "mailings/user_mailings.html"
@@ -48,22 +51,22 @@ class UserMailingsListAll(LoginRequiredMixin, ListView):
     login_url = reverse_lazy('users:login')
 
     def get_queryset(self):
-        qset = Mailing.objects.filter(owner=self.request.user)
-        return qset
+        queryset = Mailing.objects.filter(owner=self.request.user)
+        return queryset
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
         context["user_mailings_total"] = Mailing.objects.filter(owner=self.request.user).count()
         context["user_mailings_started"] = Mailing.objects.filter(owner=self.request.user, status="Запущена").count()
-        context["user_mailings_finished"] = Mailing.objects.filter(owner=self.request.user, status="Завершено").count()
+        context["user_mailings_finished"] = Mailing.objects.filter(owner=self.request.user, status="Завершена").count()
 
         return context
 
 
 class ManagerMailingsList(LoginRequiredMixin, ListView):
     """
-    Класс отображения списка всех рассылок, доступно только менеджерам.
+    Представление отображения списка всех рассылок, доступно только менеджерам.
     """
     model = Mailing
     template_name = "mailings/man_mailings.html"
@@ -79,10 +82,14 @@ class ManagerMailingsList(LoginRequiredMixin, ListView):
 
         return context
 
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        return queryset
+
 
 class UserMailingsListActive(LoginRequiredMixin, ListView):
     """
-    Класс отображения списка рассылок конкретного Пользователя.
+    Представление отображения списка активных рассылок конкретного Пользователя.
     """
     model = Mailing
     template_name = "mailings/user_mailings.html"
@@ -90,13 +97,13 @@ class UserMailingsListActive(LoginRequiredMixin, ListView):
     login_url = reverse_lazy('users:login')
 
     def get_queryset(self):
-        qset = Mailing.objects.filter(is_active=True, owner=self.request.user)
-        return qset
+        queryset = Mailing.objects.filter(is_active=True, owner=self.request.user)
+        return queryset
 
 
 class UserMailingsListNonActive(LoginRequiredMixin, ListView):
     """
-    Класс отображения списка рассылок конкретного Пользователя.
+    Представление отображения списка неактивных рассылок конкретного Пользователя.
     """
     model = Mailing
     template_name = "mailings/user_mailings.html"
@@ -104,13 +111,13 @@ class UserMailingsListNonActive(LoginRequiredMixin, ListView):
     login_url = reverse_lazy('users:login')
 
     def get_queryset(self):
-        qset = Mailing.objects.filter(is_active=False, owner=self.request.user)
-        return qset
+        queryset = Mailing.objects.filter(is_active=False, owner=self.request.user)
+        return queryset
 
 
 class AddMailing(LoginRequiredMixin, CreateView):
     """
-    Класс добавления рассылки.
+    Представление добавления рассылки.
     """
     model = Mailing
     template_name = "mailings/add_mailing.html"
@@ -141,11 +148,18 @@ class AddMailing(LoginRequiredMixin, CreateView):
 
 
 class SendMailingView(DetailView):
+    """
+    Представление отправки рассылки получателям.
+    """
     model = Mailing
     template_name = "mailings/detail_mailing.html"
     context_object_name = "mailing"
 
     def get_object(self, queryset=None):
+        """
+        Функция формирует исходные данные для функции отправки сообщения получателям,
+        а также устанавливает статус рассылки.
+        """
         self.object = super().get_object(queryset)
         self.object.status = "Запущена"
         self.object.sent_at = timezone.now()
@@ -162,37 +176,79 @@ class SendMailingView(DetailView):
         return self.object
 
     def execute_mailing(self, subject, message, from_email, recipient_emails):
-        for email in recipient_emails:
-            try:
-                send_mail(
-                    subject,
-                    message,
-                    from_email,
-                    [email],
-                    fail_silently=False
-                )
-                print(f'Рассылка успешно отправлена адресату: {email}')
-                MailingAttempt.objects.create(
+        """
+        Функция отправки e-mail сообщения.
+        """
+        connection = None
+        try:
+            connection = get_connection(
+                fail_silently=False,
+            )
+            connection.open()
+
+            for email in recipient_emails:
+                attempt = MailingAttempt(
                     attempt_date=timezone.now(),
-                    attempt_status="Успешно",
-                    mail_server_response="ok",
-                    mailing=self.object
+                    mailing=self.object,
+                    owner=self.request.user,
+                    recipient_email=email
                 )
-            except smtplib.SMTPException as e:
-                print(f'Ошибка отправки: {e}')
-                MailingAttempt.objects.create(
-                    attempt_date=timezone.now(),
-                    attempt_status="Не успешно",
-                    mail_server_response=str(e),
-                    mailing=self.object
-                )
+
+                try:
+                    email_msg = EmailMessage(
+                        subject=subject,
+                        body=message,
+                        from_email=from_email,
+                        to=[email],
+                        connection=connection,
+                        headers={
+                            'Return-Path': DEFAULT_FROM_EMAIL,
+                            'X-Mailer': 'Django Mailing System'
+                        }
+                    )
+
+                    sent_count = email_msg.send()
+
+                    if sent_count == 0:
+                        raise SMTPException("Сервер не принял письмо")
+
+                    attempt.attempt_status = "Успешно"
+                    attempt.mail_server_response = "Принято сервером"
+
+                except SMTPException as e:
+                    error_msg = str(e)
+                    print(f'Ошибка отправки на {email}: {error_msg}')
+                    attempt.attempt_status = "Не успешно"
+                    attempt.mail_server_response = error_msg[:255]
+
+                except Exception as e:
+                    error_msg = f"Неожиданная ошибка: {str(e)}"
+                    print(error_msg)
+                    attempt.attempt_status = "Не успешно"
+                    attempt.mail_server_response = error_msg[:255]
+
+                finally:
+                    attempt.save()
+
+        finally:
+            if connection:
+                try:
+                    connection.close()
+                except Exception:
+                    pass
+
         self.object.finished_at = timezone.now()
+
+        if MailingAttempt.objects.filter(mailing=self.object, attempt_status="Успешно").exists():
+            self.object.status = "Завершена"
+        else:
+            self.object.status = "Ошибка"
         self.object.save()
 
 
 class DetailMailing(LoginRequiredMixin, DetailView):
     """
-    Класс просмотра детальной информации конкретной рассылки.
+    Представление просмотра детальной информации по определенной рассылке.
     """
     model = Mailing
     template_name = "mailings/detail_mailing.html"
@@ -200,10 +256,17 @@ class DetailMailing(LoginRequiredMixin, DetailView):
     success_url = reverse_lazy('mailing:user_mailings')
     login_url = reverse_lazy('users:login')
 
+    def get_queryset(self):
+        queryset = cache.get("detail_mailing")
+        if not queryset:
+            queryset = super().get_queryset()
+            cache.set("detail_mailing", queryset, 60 * 1)  # Кешируем данные на минуту
+        return queryset
+
 
 class UpdateMailing(LoginRequiredMixin, UpdateView):
     """
-    Класс редактирования рассылки.
+    Представление редактирования рассылки.
     """
     model = Mailing
     template_name = "mailings/update_mailing.html"
@@ -214,7 +277,7 @@ class UpdateMailing(LoginRequiredMixin, UpdateView):
 
 class DeleteMailing(LoginRequiredMixin, DeleteView):
     """
-    Класс удаления рассылки.
+    Представление удаления рассылки.
     """
     model = Mailing
     template_name = "mailings/delete_mailing_confirm.html"
@@ -223,13 +286,33 @@ class DeleteMailing(LoginRequiredMixin, DeleteView):
     login_url = reverse_lazy('users:login')
 
 
+class ManagerBlockMailing(LoginRequiredMixin, UpdateView):
+    """
+    Представление отключения рассылки менеджером.
+    """
+    model = Mailing
+    form_class = MailingBlockForm
+    template_name = "mailings/block_mailing.html"
+    success_url = reverse_lazy('mailing:man_mailings')
+
+
+class ManagerUnBlockMailing(LoginRequiredMixin, UpdateView):
+    """
+    Представление включения рассылки менеджером.
+    """
+    model = Mailing
+    form_class = MailingBlockForm
+    template_name = "mailings/unblock_mailing.html"
+    success_url = reverse_lazy('mailing:man_mailings')
+
+
 # ----------------------------------------------------
 # БЛОК ПРЕДСТАВЛЕНИЙ ПО РАБОТЕ С ПОПЫТКАМИ РАССЫЛОК
 # ----------------------------------------------------
 
 class UserAttemptsMailings(LoginRequiredMixin, ListView):
     """
-    Класс отображения попыток рассылок.
+    Представление отображения попыток рассылок.
     """
     model = MailingAttempt
     template_name = "attempts/attempts.html"
@@ -237,13 +320,13 @@ class UserAttemptsMailings(LoginRequiredMixin, ListView):
     login_url = reverse_lazy('users:login')
 
     def get_queryset(self):
-        qset = MailingAttempt.objects.filter(owner_id=self.request.user.id)
-        return qset
+        queryset = MailingAttempt.objects.filter(owner_id=self.request.user.id)
+        return queryset
 
 
 class DeleteAttempt(LoginRequiredMixin, DeleteView):
     """
-    Класс удаления попытки рассылки.
+    Представление удаления попытки рассылки.
     """
     model = MailingAttempt
     template_name = "attempts/delete_attempt_confirm.html"
@@ -257,42 +340,49 @@ class DeleteAttempt(LoginRequiredMixin, DeleteView):
 
 class UserRecipientsList(LoginRequiredMixin, ListView):
     """
-    Класс отображения списка Получателей рассылки.
+    Представление отображения списка Получателей рассылки.
     """
     model = Recipient
     template_name = "recipients/recipients.html"
     context_object_name = "recipients"
 
     def get_queryset(self):
-        qset = Recipient.objects.filter(owner=self.request.user)
-        return qset
+        queryset = Recipient.objects.filter(owner=self.request.user)
+        return queryset
 
 
 class ManagerRecipientsList(LoginRequiredMixin, ListView):
     """
-    Класс отображения списка Получателей рассылки для менеджеров.
+    Представление отображения списка Получателей рассылки для менеджеров.
     """
     model = Recipient
     template_name = "recipients/recipients.html"
     context_object_name = "recipients"
 
     def get_queryset(self):
-        qset = Recipient.objects.all()
-        return qset
+        queryset = Recipient.objects.all()
+        return queryset
 
 
 class DetailRecipient(LoginRequiredMixin, DetailView):
     """
-    Класс просмотра детальной информации конкретного Получателя рассылки.
+    Представление просмотра детальной информации конкретного Получателя рассылки.
     """
     model = Recipient
     template_name = "recipients/detail_recipient.html"
     context_object_name = "recipient"
 
+    def get_queryset(self):
+        queryset = cache.get("recipient")
+        if not queryset:
+            queryset = super().get_queryset()
+            cache.set("recipient", queryset, 60 * 1)  # Кешируем данные на минуту
+        return queryset
+
 
 class AddRecipient(LoginRequiredMixin, CreateView):
     """
-    Класс добавления Получателя рассылки.
+    Представление добавления Получателя рассылки.
     """
     model = Recipient
     template_name = "recipients/add_recipient.html"
@@ -311,7 +401,7 @@ class AddRecipient(LoginRequiredMixin, CreateView):
 
 class UpdateRecipient(LoginRequiredMixin, UpdateView):
     """
-    Класс редактирования Получателя рассылки.
+    Представление редактирования Получателя рассылки.
     """
     model = Recipient
     template_name = "recipients/update_recipient.html"
@@ -322,7 +412,7 @@ class UpdateRecipient(LoginRequiredMixin, UpdateView):
 
 class DeleteRecipient(LoginRequiredMixin, DeleteView):
     """
-    Класс удаления Получателя рассылки.
+    Представление удаления Получателя рассылки.
     """
     model = Recipient
     template_name = "recipients/delete_recipient_confirm.html"
@@ -336,20 +426,20 @@ class DeleteRecipient(LoginRequiredMixin, DeleteView):
 
 class UserMessageList(LoginRequiredMixin, ListView):
     """
-    Класс отображения списка сообщений.
+    Представление отображения списка сообщений.
     """
     model = Message
     template_name = "messages/messages.html"
     context_object_name = "messages"
 
     def get_queryset(self):
-        qset = Message.objects.filter(owner=self.request.user)
-        return qset
+        queryset = Message.objects.filter(owner=self.request.user)
+        return queryset
 
 
 class AddMessage(LoginRequiredMixin, CreateView):
     """
-    Класс добавления сообщений.
+    Представление добавления сообщения.
     """
     model = Message
     template_name = "messages/add_message.html"
@@ -368,16 +458,23 @@ class AddMessage(LoginRequiredMixin, CreateView):
 
 class DetailMessage(LoginRequiredMixin, DetailView):
     """
-    Класс просмотра детальной информации конкретного сообщения.
+    Представление просмотра детальной информации конкретного сообщения.
     """
     model = Message
     template_name = "messages/detail_message.html"
     context_object_name = "message"
 
+    def get_queryset(self):
+        queryset = cache.get("message")
+        if not queryset:
+            queryset = super().get_queryset()
+            cache.set("message", queryset, 60 * 1)  # Кешируем данные на минуту
+        return queryset
+
 
 class UpdateMessage(LoginRequiredMixin, UpdateView):
     """
-    Класс редактирования сообщения.
+    Представление редактирования сообщения.
     """
     model = Message
     template_name = "messages/update_message.html"
@@ -388,7 +485,7 @@ class UpdateMessage(LoginRequiredMixin, UpdateView):
 
 class DeleteMessage(LoginRequiredMixin, DeleteView):
     """
-    Класс удаления сообщения.
+    Представление удаления сообщения.
     """
     model = Message
     template_name = "messages/delete_message_confirm.html"
@@ -401,6 +498,6 @@ class DeleteMessage(LoginRequiredMixin, DeleteView):
 # --------------
 class Contacts(TemplateView):
     """
-    Класс отображения страницы Контактов.
+    Представление отображения страницы Контактов.
     """
     template_name = "mailings/contacts.html"

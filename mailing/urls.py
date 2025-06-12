@@ -8,7 +8,7 @@ from mailing.views import (AddMailing, AddMessage, AddRecipient, Contacts,
                            UpdateMailing, UpdateMessage,
                            UpdateRecipient, SendMailingView, UserAttemptsMailings, DeleteAttempt,
                            UserMailingsListAll, UserMailingsListActive, UserMailingsListNonActive, ManagerMailingsList,
-                           ManagerRecipientsList)
+                           ManagerRecipientsList, ManagerBlockMailing, ManagerUnBlockMailing)
 
 app_name = MailingConfig.name
 
@@ -47,6 +47,8 @@ urlpatterns = [
     # блок представлений для менеджеров
     path("manager-mailings/", ManagerMailingsList.as_view(), name="man_mailings"),
     path("manager-recipients/", ManagerRecipientsList.as_view(), name="manager_recipients"),
+    path("block-mailing/<int:pk>/", ManagerBlockMailing.as_view(), name="manager_block_mailing"),
+    path("unblock-mailing/<int:pk>/", ManagerUnBlockMailing.as_view(), name="manager_unblock_mailing"),
 
     # блок представлений для работы с контактами
     path("contacts/", Contacts.as_view(), name="contacts"),

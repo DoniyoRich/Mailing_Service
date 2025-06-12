@@ -4,6 +4,10 @@ from .models import Mailing, Recipient, Message
 
 
 class MailingNewForm(forms.ModelForm):
+    """
+    Форма для новой рассылки.
+    """
+
     class Meta:
         model = Mailing
         fields = ("message", "recipient")
@@ -24,6 +28,10 @@ class MailingNewForm(forms.ModelForm):
 
 
 class MailingUpdateForm(forms.ModelForm):
+    """
+    Форма редактирования рассылки.
+    """
+
     class Meta:
         model = Mailing
         fields = ("message", "recipient")
@@ -39,24 +47,50 @@ class MailingUpdateForm(forms.ModelForm):
 
 
 class RecipientNewForm(forms.ModelForm):
+    """
+    Форма для нового получателя рассылки.
+    """
+
     class Meta:
         model = Recipient
         fields = ("email", "fullname", "comment",)
 
 
 class RecipientUpdateForm(forms.ModelForm):
+    """
+    Форма редактирования получателя рассылки.
+    """
+
     class Meta:
         model = Recipient
         fields = ("email", "fullname", "comment",)
 
 
 class MessageNewForm(forms.ModelForm):
+    """
+    Форма для нового сообщения.
+    """
+
     class Meta:
         model = Message
         fields = ("subject", "message_body",)
 
 
 class MessageUpdateForm(forms.ModelForm):
+    """
+    Форма редактирования нового сообщения.
+    """
+
     class Meta:
         model = Message
         fields = ("subject", "message_body",)
+
+
+class MailingBlockForm(forms.ModelForm):
+    """
+    Форма отключения рассылки.
+    """
+
+    class Meta:
+        model = Mailing
+        fields = ('is_active',)

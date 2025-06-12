@@ -3,6 +3,9 @@ from django.db import models
 
 
 class CustomUser(AbstractUser):
+    """
+    Модель кастомного пользователя.
+    """
     username = models.CharField(max_length=150, unique=True, blank=True, null=True)
     email = models.EmailField(unique=True, verbose_name='e-mail')
     avatar = models.ImageField(upload_to='users/avatars/', verbose_name='Аватар', blank=True, null=True)
