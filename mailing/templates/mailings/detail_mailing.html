@@ -21,7 +21,9 @@
                 <p class="card-text"><b>Статус</b>: {{ mailing.status }}</p>
                 <div class="d-flex justify-content-between align-items-center">
                     <div class="btn-group">
-                        <a class="btn btn-primary" href="javascript:history.back()" role="button">Назад</a>
+                        {% if perms.mailing.change_mailing %}
+                        <a class="btn btn-primary" href="{% url 'mailing:user_mailings' %}" role="button">Назад</a>
+                        {% endif %}
                         {% if mailing.status == 'Создана' and perms.mailing.change_mailing %}
                         <a class="btn btn-warning" href="{% url 'mailing:update_mailing' mailing.pk %}"
                            role="button">Изменить</a>

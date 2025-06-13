@@ -9,15 +9,16 @@ from django.views.generic import (CreateView, DeleteView, DetailView, ListView,
                                   TemplateView, UpdateView)
 
 from config.settings import DEFAULT_FROM_EMAIL
-from mailing.forms import (MailingNewForm, MailingUpdateForm, MessageNewForm,
-                           MessageUpdateForm, RecipientNewForm,
-                           RecipientUpdateForm, MailingBlockForm)
+from mailing.forms import (MailingBlockForm, MailingNewForm, MailingUpdateForm,
+                           MessageNewForm, MessageUpdateForm, RecipientNewForm,
+                           RecipientUpdateForm)
 from mailing.models import Mailing, MailingAttempt, Message, Recipient
 
 
 # -----------------------------------------
 # БЛОК ПРЕДСТАВЛЕНИЙ ПО РАБОТЕ С РАССЫЛКАМИ
 # -----------------------------------------
+
 
 class MailingsTotalList(ListView):
     """
@@ -36,7 +37,8 @@ class MailingsTotalList(ListView):
         context["total_failed"] = "данных нет" if not Mailing.objects.filter(
             status="Ошибка").exists() else Mailing.objects.filter(status="Ошибка").count()
         context[
-            "unique_recipients"] = "данных нет" if not Recipient.objects.all().exists() else Recipient.objects.all().distinct().count()
+            "unique_recipients"] = "данных нет" \
+            if not Recipient.objects.all().exists() else Recipient.objects.all().distinct().count()
 
         return context
 
@@ -322,6 +324,16 @@ class UserAttemptsMailings(LoginRequiredMixin, ListView):
     def get_queryset(self):
         queryset = MailingAttempt.objects.filter(owner_id=self.request.user.id)
         return queryset
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data()
+
+        context['att_total'] = MailingAttempt.objects.filter(owner_id=self.request.user.id).count()
+        context['att_success'] = MailingAttempt.objects.filter(owner_id=self.request.user.id,
+                                                               attempt_status="Успешно").count()
+        context['att_fail'] = MailingAttempt.objects.filter(owner_id=self.request.user.id,
+                                                            attempt_status="Не успешно").count()
+        return context
 
 
 class DeleteAttempt(LoginRequiredMixin, DeleteView):

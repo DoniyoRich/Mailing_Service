@@ -1,10 +1,12 @@
 from django.contrib.auth import login
 from django.contrib.auth.views import LoginView
 from django.urls import reverse_lazy
-from django.views.generic import ListView, CreateView, DetailView, UpdateView, DeleteView
+from django.views.generic import (CreateView, DeleteView, DetailView, ListView,
+                                  UpdateView)
 
 from mailing.constants import MANAGER_GROUP_NAME
-from users.forms import UserRegisterForm, UserEditProfileForm, UserBlockProfileForm
+from users.forms import (UserBlockProfileForm, UserEditProfileForm,
+                         UserRegisterForm)
 from users.models import CustomUser
 
 

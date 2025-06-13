@@ -1,6 +1,6 @@
 from django import forms
 
-from .models import Mailing, Recipient, Message
+from .models import Mailing, Message, Recipient
 
 
 class MailingNewForm(forms.ModelForm):

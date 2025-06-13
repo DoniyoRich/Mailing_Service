@@ -2,13 +2,16 @@ from django.urls import path
 
 from mailing.apps import MailingConfig
 from mailing.views import (AddMailing, AddMessage, AddRecipient, Contacts,
-                           DeleteMailing, DeleteMessage, DeleteRecipient,
-                           DetailMailing, DetailMessage, DetailRecipient,
-                           MailingsTotalList, UserMessageList, UserRecipientsList,
-                           UpdateMailing, UpdateMessage,
-                           UpdateRecipient, SendMailingView, UserAttemptsMailings, DeleteAttempt,
-                           UserMailingsListAll, UserMailingsListActive, UserMailingsListNonActive, ManagerMailingsList,
-                           ManagerRecipientsList, ManagerBlockMailing, ManagerUnBlockMailing)
+                           DeleteAttempt, DeleteMailing, DeleteMessage,
+                           DeleteRecipient, DetailMailing, DetailMessage,
+                           DetailRecipient, MailingsTotalList,
+                           ManagerBlockMailing, ManagerMailingsList,
+                           ManagerRecipientsList, ManagerUnBlockMailing,
+                           SendMailingView, UpdateMailing, UpdateMessage,
+                           UpdateRecipient, UserAttemptsMailings,
+                           UserMailingsListActive, UserMailingsListAll,
+                           UserMailingsListNonActive, UserMessageList,
+                           UserRecipientsList)
 
 app_name = MailingConfig.name
 
