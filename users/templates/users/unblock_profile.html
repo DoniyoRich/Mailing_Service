@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% load my_tags %}
+
+{% block content %}
+
+<div class="container">
+    <div class="row">
+        <div class="col">
+            <h2>Разблокировать Пользователя</h2>
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <p>
+                    Статус активности:
+                    {{ form.is_active }}
+                </p>
+                <button type="submit" class="btn btn-success">Разблокировать</button>
+                <a href="{% url 'users:users_list' %}" class="btn btn-warning">Еще рано</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock%}

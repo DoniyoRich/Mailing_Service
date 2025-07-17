@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container">
+    <div class="col">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <p class="card-text"><b>ФИО Получателя:</b>: {{ recipient.fullname }}</p>
+                <p class="card-text"><b>email:</b>: {{ recipient.email }}</p>
+                <p class="card-text"><b>Комментарий:</b>: {{ recipient.comment }}</p>
+                <p class="card-text"><b>Владелец:</b>: {{ recipient.owner }}</p>
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="btn-group">
+                        <a class="btn btn-primary" href="javascript:history.back()" role="button">Назад</a>
+                        {% if perms.mailing.change_recipient %}
+                        <a class="btn btn-warning" href="{% url 'mailing:update_recipient' recipient.pk %}"
+                           role="button">Изменить</a>
+                        {% endif %}
+                        {% if perms.mailing.delete_recipient %}
+                        <a class="btn btn-danger" href="{% url 'mailing:delete_recipient' recipient.pk %}"
+                           role="button">Удалить</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

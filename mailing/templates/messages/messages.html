@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container">
+    <a href="{% url 'mailing:add_message' %}">
+        <button type="button" class="btn btn-warning text-center m-3">Новое сообщение</button>
+    </a>
+</div>
+<div class="container p-3 border border-primary-subtle text-info-emphasis">
+    <table class="table table-striped">
+        {% for message in messages %}
+        <tr>
+            <td class="w-25"><b>Тема сообщения: {{ message.subject }}</b></td>
+            <td class="w-25">Сообщение: {{ message.message_body|truncatechars:50 }}</td>
+            <td class="w-25">
+                <div class="btn-group">
+                    <a class="btn btn-primary" href="{% url 'mailing:detail_message' message.pk %}"
+                       role="button">Подробнее</a>
+                </div>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+
+{% endblock %}
