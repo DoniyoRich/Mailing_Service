@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% load my_tags %}
+
+{% block content %}
+
+<div class="container">
+    <div class="row">
+        <div class="col">
+            <h2>Включить рассылку</h2>
+            <form method="post">
+                {% csrf_token %}
+                <p>
+                    Статус рассылки:
+                    {{ form.is_active }}
+                </p>
+                <button type="submit" class="btn btn-success">Включить</button>
+                <a href="{% url 'mailing:man_mailings' %}" class="btn btn-warning">Нет, отбой</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock%}

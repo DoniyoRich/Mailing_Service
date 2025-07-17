@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container">
+    <a href="{% url 'mailing:add_mailing' %}">
+        <button type="button" class="btn btn-warning text-center m-3">Новая рассылка</button>
+    </a>
+    <a class="link-opacity-50-hover" href="{% url 'mailing:user_mailings' %}">Все рассылки</a>
+    <a class="link-opacity-50-hover" href="{% url 'mailing:user_mailings_active' %}">Только активные</a>
+    <a class="link-opacity-50-hover" href="{% url 'mailing:user_mailings_nonactive' %}">Только неактивные</a>
+    <p>
+        <u><span>Всего рассылок: {{ user_mailings_total }}, </span><span>Запущено: {{ user_mailings_started }}, </span><span> Завершено: {{ user_mailings_finished }}</span></u>
+    </p>
+</div>
+<div class="container p-3 border border-primary-subtle text-info-emphasis min-vh-50 h-100">
+    <table class="table table-striped">
+        {% for mailing in user_mailings %}
+        <tr>
+            <td class="w-25"><b>Создана: </b>{{ mailing.created_at }}</td>
+            <td class="w-25"><b>Статус: </b>{{ mailing.status }}</td>
+            <td class="w-25"><b>Сообщение: </b>{{ mailing.message|truncatechars:50 }}</td>
+            <td class="w-25"><b>Получатели: </b>
+                {% for recipient in mailing.recipient.all %}
+                {{ recipient.fullname|truncatechars:15 }}
+                {% if not forloop.last %}, {% endif %}
+                {% empty %}
+                Нет получателей
+                {% endfor %}
+            </td>
+            <td class="w-25">
+                <div class="btn-group">
+                    <a class="btn btn-primary mx-2" href="{% url 'mailing:detail_mailing' mailing.pk %}"
+                       role="button">Подробнее
+                    </a>
+                    {% if mailing.status == 'Запущена' or mailing.status == 'Завершена'%}
+                    <a class="btn btn-danger mx-2" href="{% url 'mailing:delete_mailing' mailing.pk %}"
+                       role="button">Удалить
+                    </a>
+                    {% else %}
+                    <a class="btn btn-primary mx-2" href="{% url 'mailing:send_mailing' mailing.pk %}"
+                       role="button">Отправить
+                    </a>
+                    {% endif %}
+                </div>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+
+{% endblock %}

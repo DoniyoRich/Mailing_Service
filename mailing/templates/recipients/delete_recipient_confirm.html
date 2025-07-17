@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container">
+    <h2>Удаление Получателя рассылок</h2>
+    <h3>Вы уверены, что хотите удалить Получателя?</h3>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Удалить</button>
+        <a href="{% url 'mailing:recipients' %}" class="btn btn-secondary">Нет, отбой</a>
+    </form>
+</div>
+
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% load my_tags %}
+
+{% block content %}
+
+<div class="container">
+    <div class="col">
+        <div style="display: flex">
+            <img src="{{ custom_user.avatar | media_filter }}" style="width: 200px">
+        </div>
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <p class="card-text"><b>Имя пользователя</b>: {{ custom_user.username }}</p>
+                <p class="card-text"><b>Email</b>: {{ custom_user.email }}</p>
+                <p class="card-text"><b>Номер телефона</b>: {{ custom_user.phone_number }}</p>
+                <p class="card-text"><b>Страна</b>: {{ custom_user.country }}</p>
+                {% if custom_user.is_active %}
+                <p class="card-text"><b>Статус активности</b>: Активен</p>
+                {% else %}
+                <p class="card-text"><b>Статус активности</b>: Заблокирован</p>
+                {% endif %}
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="btn-group">
+                        {% if perms.users.change_customuser %}
+                        <a class="btn btn-warning" href="{% url 'users:edit_profile' custom_user.pk %}" role="button">Редактировать</a>
+                        {% endif %}
+                        {% if perms.users.can_block_user and not custom_user.is_superuser and custom_user != request.user and custom_user.is_active%}
+                        <a class="btn btn-danger" href="{% url 'users:block_profile' custom_user.pk %}" role="button">Заблокировать</a>
+                        {% endif %}
+                        {% if perms.users.can_block_user and not custom_user.is_active %}
+                        <a class="btn btn-success" href="{% url 'users:unblock_profile' custom_user.pk %}" role="button">Разблокировать</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock%}

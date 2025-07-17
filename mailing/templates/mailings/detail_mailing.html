@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container">
+    <div class="col">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <p class="card-text"><b>Сообщение</b>: {{ mailing.message }}</p>
+                <p class="card-text"><b>Получатели</b>:
+                    {% for recipient in mailing.recipient.all %}
+                    {{ recipient.fullname|truncatechars:15 }}
+                    {% if not forloop.last %}, {% endif %}
+                    {% empty %}
+                    Нет получателей
+                    {% endfor %}
+
+                <p class="card-text"><b>Дата создания</b>: {{ mailing.created_at }}</p>
+                <p class="card-text"><b>Дата отправки</b>: {{ mailing.sent_at }}</p>
+                <p class="card-text"><b>Дата завершения</b>: {{ mailing.finished_at }}</p>
+                <p class="card-text"><b>Статус</b>: {{ mailing.status }}</p>
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="btn-group">
+                        {% if perms.mailing.change_mailing %}
+                        <a class="btn btn-primary" href="{% url 'mailing:user_mailings' %}" role="button">Назад</a>
+                        {% endif %}
+                        {% if mailing.status == 'Создана' and perms.mailing.change_mailing %}
+                        <a class="btn btn-warning" href="{% url 'mailing:update_mailing' mailing.pk %}"
+                           role="button">Изменить</a>
+                        {% endif %}
+                        {% if mailing.status == 'Создана' and perms.mailing.delete_mailing %}
+                        <a class="btn btn-danger" href="{% url 'mailing:delete_mailing' mailing.pk %}"
+                           role="button">Удалить</a>
+                        {% endif %}
+                        {% if perms.mailing.can_switch_off_mailing and mailing.is_active %}
+                        <a class="btn btn-danger" href="{% url 'mailing:manager_block_mailing' mailing.pk %}"
+                           role="button">Отключить</a>
+                        {% endif %}
+                        {% if perms.mailing.can_switch_off_mailing and not mailing.is_active %}
+                        <a class="btn btn-success" href="{% url 'mailing:manager_unblock_mailing' mailing.pk %}"
+                           role="button">Включить</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
